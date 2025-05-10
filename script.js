@@ -55,6 +55,27 @@ function loadData(pen) {
   db.ref(`/${pen}/gas`).on("value", snap => {
     document.getElementById("gas").innerText = snap.val();
   });
+  // Load device state
+["light", "door", "music"].forEach(device => {
+  db.ref(`/${pen}/${device}`).on("value", snap => {
+    const isOn = snap.val() === 1;
+    let imgId = "";
+    let imgSrc = "";
+
+    if (device === "light") {
+      imgId = "imgLight";
+      imgSrc = isOn ? "den1.gif" : "den.png";
+    } else if (device === "door") {
+      imgId = "imgDoor";
+      imgSrc = isOn ? "door1.gif" : "door.png";
+    } else if (device === "music") {
+      imgId = "imgMusic";
+      imgSrc = isOn ? "nhac1.gif" : "nhac.png";
+    }
+
+    document.getElementById(imgId).src = imgSrc;
+  });
+});
 }
 
 function toggleDevice(device, isOn) {
