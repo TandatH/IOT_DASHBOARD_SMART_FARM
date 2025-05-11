@@ -18,7 +18,8 @@ const body = document.getElementById("farmBody");
 const timeInput = document.getElementById("timePicker");
 const imgTime = document.getElementById("imgTime");
 
-let currentPen = "chuongcuu";  // Biến lưu chuồng hiện tại
+let currentPen = "chuongcuu";  // Chuồng hiện tại
+let previousPen = "";          // Chuồng trước đó
 
 // Start App
 function startApp() {
@@ -36,11 +37,17 @@ function goBack() {
 
 // Switch pen
 function switchPen(type) {
+  previousPen = currentPen;
   currentPen = type === "cuu" ? "chuongcuu" : "chuongga";
+
+  // Hủy lắng nghe chuồng cũ
+  ["temperature", "humidity", "gas", "light", "door", "music"].forEach(key => {
+    db.ref(`/${previousPen}/${key}`).off();
+  });
+
   body.style.backgroundImage = `url('${currentPen}.jpg')`;
   loadData(currentPen);
 }
-
 
 // Update day/night image
 function updateImageByTime(timeStr) {
@@ -50,12 +57,6 @@ function updateImageByTime(timeStr) {
 
 // Load data from Firebase
 function loadData(pen) {
-  // Hủy lắng nghe cũ
-  ["temperature", "humidity", "gas", "light", "door", "music"].forEach(key => {
-    db.ref(`/${pen}/${key}`).off();
-  });
-
-  // Load cảm biến
   db.ref(`/${pen}/temperature`).on("value", snap => {
     document.getElementById("temperature").innerText = snap.val();
   });
@@ -66,7 +67,6 @@ function loadData(pen) {
     document.getElementById("gas").innerText = snap.val();
   });
 
-  // Load trạng thái thiết bị
   ["light", "door", "music"].forEach(device => {
     db.ref(`/${pen}/${device}`).on("value", snap => {
       const isOn = snap.val() === 1;
@@ -89,11 +89,11 @@ function loadData(pen) {
   });
 }
 
+// Toggle device
 function toggleDevice(device, isOn) {
-  const pen = currentPen;
   const value = isOn ? 1 : 0;
 
-  db.ref(`/${pen}/${device}`).set(value);
+  db.ref(`/${currentPen}/${device}`).set(value);
 
   let imgId = "";
   let imgSrc = "";
@@ -120,7 +120,7 @@ window.addEventListener("load", () => {
   const timeStr = `${hours}:${mins}`;
   timeInput.value = timeStr;
   updateImageByTime(timeStr);
-  loadData("chuongcuu"); // Default load
+  loadData(currentPen); // Load chuồng mặc định
 });
 
 timeInput.addEventListener("change", function () {
