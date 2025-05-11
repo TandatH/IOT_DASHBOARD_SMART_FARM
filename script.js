@@ -18,6 +18,8 @@ const body = document.getElementById("farmBody");
 const timeInput = document.getElementById("timePicker");
 const imgTime = document.getElementById("imgTime");
 
+let currentPen = "chuongcuu";  // Biến lưu chuồng hiện tại
+
 // Start App
 function startApp() {
   document.getElementById("startPage").style.display = "none";
@@ -34,9 +36,11 @@ function goBack() {
 
 // Switch pen
 function switchPen(type) {
-  body.style.backgroundImage = `url('chuong${type}.jpg')`;
-  loadData(type);
+  currentPen = type === "cuu" ? "chuongcuu" : "chuongga";
+  body.style.backgroundImage = `url('${currentPen}.jpg')`;
+  loadData(currentPen);
 }
+
 
 // Update day/night image
 function updateImageByTime(timeStr) {
@@ -46,6 +50,12 @@ function updateImageByTime(timeStr) {
 
 // Load data from Firebase
 function loadData(pen) {
+  // Hủy lắng nghe cũ
+  ["temperature", "humidity", "gas", "light", "door", "music"].forEach(key => {
+    db.ref(`/${pen}/${key}`).off();
+  });
+
+  // Load cảm biến
   db.ref(`/${pen}/temperature`).on("value", snap => {
     document.getElementById("temperature").innerText = snap.val();
   });
@@ -55,31 +65,32 @@ function loadData(pen) {
   db.ref(`/${pen}/gas`).on("value", snap => {
     document.getElementById("gas").innerText = snap.val();
   });
-  // Load device state
-["light", "door", "music"].forEach(device => {
-  db.ref(`/${pen}/${device}`).on("value", snap => {
-    const isOn = snap.val() === 1;
-    let imgId = "";
-    let imgSrc = "";
 
-    if (device === "light") {
-      imgId = "imgLight";
-      imgSrc = isOn ? "den1.gif" : "den.png";
-    } else if (device === "door") {
-      imgId = "imgDoor";
-      imgSrc = isOn ? "door1.gif" : "door.png";
-    } else if (device === "music") {
-      imgId = "imgMusic";
-      imgSrc = isOn ? "nhac1.gif" : "nhac.png";
-    }
+  // Load trạng thái thiết bị
+  ["light", "door", "music"].forEach(device => {
+    db.ref(`/${pen}/${device}`).on("value", snap => {
+      const isOn = snap.val() === 1;
+      let imgId = "";
+      let imgSrc = "";
 
-    document.getElementById(imgId).src = imgSrc;
+      if (device === "light") {
+        imgId = "imgLight";
+        imgSrc = isOn ? "den1.gif" : "den.png";
+      } else if (device === "door") {
+        imgId = "imgDoor";
+        imgSrc = isOn ? "door1.gif" : "door.png";
+      } else if (device === "music") {
+        imgId = "imgMusic";
+        imgSrc = isOn ? "nhac1.gif" : "nhac.png";
+      }
+
+      document.getElementById(imgId).src = imgSrc;
+    });
   });
-});
 }
 
 function toggleDevice(device, isOn) {
-  const pen = body.style.backgroundImage.includes("chuongga") ? "chuongga" : "chuongcuu";
+  const pen = currentPen;
   const value = isOn ? 1 : 0;
 
   db.ref(`/${pen}/${device}`).set(value);
@@ -100,7 +111,6 @@ function toggleDevice(device, isOn) {
 
   document.getElementById(imgId).src = imgSrc;
 }
-
 
 // Auto set time image
 window.addEventListener("load", () => {
