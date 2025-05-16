@@ -21,7 +21,7 @@
     {
       "type": "wokwi-led",
       "id": "led3",
-      "top": -61.2,
+      "top": -80.4,
       "left": -130.6,
       "attrs": { "color": "red" }
     },
@@ -54,7 +54,6 @@
     [ "dht1:GND", "esp:GND.2", "black", [ "v96", "h-76.8", "v-153.6" ] ],
     [ "led1:A", "esp:12", "green", [ "v288", "h167.81" ] ],
     [ "led2:A", "esp:14", "green", [ "v0" ] ],
-    [ "led3:A", "esp:35", "green", [ "v0" ] ],
     [ "led4:A", "esp:26", "green", [ "v0" ] ],
     [ "led5:A", "esp:33", "green", [ "v0" ] ],
     [ "led6:A", "esp:25", "green", [ "v0" ] ],
@@ -63,7 +62,8 @@
     [ "led3:C", "led2:C", "green", [ "v0" ] ],
     [ "led4:C", "led3:C", "green", [ "v0" ] ],
     [ "led5:C", "led4:C", "green", [ "v0" ] ],
-    [ "led6:C", "led5:C", "green", [ "v0" ] ]
+    [ "led6:C", "led5:C", "green", [ "v0" ] ],
+    [ "led3:A", "esp:27", "green", [ "v0" ] ]
   ],
   "dependencies": {}
 }
