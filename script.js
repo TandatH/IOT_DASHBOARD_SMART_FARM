@@ -9,80 +9,120 @@ var firebaseConfig = {
   appId: "1:255764597948:web:eedcc54ab6703d497954b9",
   measurementId: "G-VQT3ZHCX9R"
 };
+
 firebase.initializeApp(firebaseConfig);
 firebase.analytics();
 const db = firebase.database();
 
-let currentPen = "chuongcuu";
+const body = document.getElementById("farmBody");
+const timeInput = document.getElementById("timePicker");
+const imgTime = document.getElementById("imgTime");
 
-// =========== Clock ============
-function updateClock(){
-  document.getElementById("clock").innerText = new Date().toLocaleTimeString();
-}
-setInterval(updateClock,1000); updateClock();
+let currentPen = "chuongcuu";  // Biến lưu chuồng hiện tại
 
-// =========== Chart.js setup ============
-const barChart = new Chart(document.getElementById("barChart"), {
-  type:"bar",
-  data:{ labels:[], datasets:[{ label:"Gas", data:[], backgroundColor:"#3e95cd" }] },
-  options:{ responsive:true, maintainAspectRatio:false }
-});
-const lineChart = new Chart(document.getElementById("lineChart"), {
-  type:"line",
-  data:{ labels:[], datasets:[{ label:"Temperature (°C)", data:[], fill:false }] },
-  options:{ responsive:true, maintainAspectRatio:false }
-});
-const pieChart = new Chart(document.getElementById("pieChart"), {
-  type:"pie",
-  data:{ labels:["CO₂","Temp","Humidity"], datasets:[{ data:[0,0,0] }] },
-  options:{ responsive:true, maintainAspectRatio:false }
-});
-const MAX_POINTS = 20;
-function pushData(chart,label,val){
-  chart.data.labels.push(label);
-  chart.data.datasets[0].data.push(val);
-  if(chart.data.labels.length>MAX_POINTS){ chart.data.labels.shift(); chart.data.datasets[0].data.shift(); }
-  chart.update();
+// Start App
+function startApp() {
+  document.getElementById("startPage").style.display = "none";
+  document.getElementById("mainPage").style.display = "block";
+  body.style.backgroundImage = "url('chuongcuu.jpg')";
 }
 
-// =========== Firebase listeners ============
-function listenSensor(key,cb){ db.ref(`/${currentPen}/${key}`).on("value", snap=>cb(snap.val())); }
+// Back
+function goBack() {
+  document.getElementById("startPage").style.display = "flex";
+  document.getElementById("mainPage").style.display = "none";
+  body.style.backgroundImage = "url('mainbackground.jpg')";
+}
 
-listenSensor("gas", val=>{
-  document.getElementById("gas").textContent = val ?? "--";
-  pushData(barChart, new Date().toLocaleTimeString(), val);
-  pieChart.data.datasets[0].data[0]=val; pieChart.update();
-});
-listenSensor("temperature", val=>{
-  document.getElementById("temperature").textContent = val ?? "--";
-  pushData(lineChart, new Date().toLocaleTimeString(), val);
-  pieChart.data.datasets[0].data[1]=val; pieChart.update();
-});
-listenSensor("humidity", val=>{
-  document.getElementById("humidity").textContent = val ?? "--";
-  pieChart.data.datasets[0].data[2]=val; pieChart.update();
-});
+// Switch pen
+function switchPen(type) {
+  currentPen = type === "cuu" ? "chuongcuu" : "chuongga";
+  body.style.backgroundImage = `url('${currentPen}.jpg')`;
+  loadData(currentPen);
+}
 
-// Device icon map
-const mapIcon = {
-  light:{on:"den1.gif",off:"den.png",id:"imgLight"},
-  door:{on:"door1.gif",off:"door.png",id:"imgDoor"},
-  music:{on:"nhac1.gif",off:"nhac.png",id:"imgMusic"}
-};
-["light","door","music"].forEach(device=>{
-  listenSensor(device, val=>{
-    const cfg = mapIcon[device];
-    document.getElementById(cfg.id).src = (val===1)?cfg.on:cfg.off;
+
+// Update day/night image
+function updateImageByTime(timeStr) {
+  const hour = parseInt(timeStr.split(":")[0]);
+  imgTime.src = (hour >= 6 && hour < 18) ? "ngay.gif" : "dem.gif";
+}
+
+// Load data from Firebase
+function loadData(pen) {
+  // Hủy lắng nghe cũ
+  ["temperature", "humidity", "gas", "light", "door", "music"].forEach(key => {
+    db.ref(`/${pen}/${key}`).off();
   });
+
+  // Load cảm biến
+  db.ref(`/${pen}/temperature`).on("value", snap => {
+    document.getElementById("temperature").innerText = snap.val();
+  });
+  db.ref(`/${pen}/humidity`).on("value", snap => {
+    document.getElementById("humidity").innerText = snap.val();
+  });
+  db.ref(`/${pen}/gas`).on("value", snap => {
+    document.getElementById("gas").innerText = snap.val();
+  });
+
+  // Load trạng thái thiết bị
+  ["light", "door", "music"].forEach(device => {
+    db.ref(`/${pen}/${device}`).on("value", snap => {
+      const isOn = snap.val() === 1;
+      let imgId = "";
+      let imgSrc = "";
+
+      if (device === "light") {
+        imgId = "imgLight";
+        imgSrc = isOn ? "den1.gif" : "den.png";
+      } else if (device === "door") {
+        imgId = "imgDoor";
+        imgSrc = isOn ? "door1.gif" : "door.png";
+      } else if (device === "music") {
+        imgId = "imgMusic";
+        imgSrc = isOn ? "nhac1.gif" : "nhac.png";
+      }
+
+      document.getElementById(imgId).src = imgSrc;
+    });
+  });
+}
+
+function toggleDevice(device, isOn) {
+  const pen = currentPen;
+  const value = isOn ? 1 : 0;
+
+  db.ref(`/${pen}/${device}`).set(value);
+
+  let imgId = "";
+  let imgSrc = "";
+
+  if (device === "light") {
+    imgId = "imgLight";
+    imgSrc = isOn ? "den1.gif" : "den.png";
+  } else if (device === "door") {
+    imgId = "imgDoor";
+    imgSrc = isOn ? "door1.gif" : "door.png";
+  } else if (device === "music") {
+    imgId = "imgMusic";
+    imgSrc = isOn ? "nhac1.gif" : "nhac.png";
+  }
+
+  document.getElementById(imgId).src = imgSrc;
+}
+
+// Auto set time image
+window.addEventListener("load", () => {
+  const now = new Date();
+  const hours = now.getHours().toString().padStart(2, '0');
+  const mins = now.getMinutes().toString().padStart(2, '0');
+  const timeStr = `${hours}:${mins}`;
+  timeInput.value = timeStr;
+  updateImageByTime(timeStr);
+  loadData("chuongcuu"); // Default load
 });
 
-function toggleDevice(device,isOn){
-  db.ref(`/${currentPen}/${device}`).set(isOn?1:0);
-  if (device === "music") {
-    const audio = document.querySelector("audio");
-    if (audio) {
-      if (isOn) audio.play();
-      else audio.pause();
-    }
-  }
-}
+timeInput.addEventListener("change", function () {
+  updateImageByTime(this.value);
+});
