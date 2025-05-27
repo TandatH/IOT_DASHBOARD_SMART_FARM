@@ -47,39 +47,68 @@
       </div>
     </div>
 
-    <!-- Điều khiển thiết bị -->
-    <div class="control-section">
-      <div class="control-box">
-        <img id="imgLight" src="den.png" class="icon">
-        <div>
-          <button class="on-btn" onclick="toggleDevice('light', true)">On</button>
-          <button class="off-btn" onclick="toggleDevice('light', false)">Off</button>
-        </div>
-        <p>Light</p>
-      </div>
-
-      <div class="control-box">
-        <img id="imgDoor" src="door.png" class="icon">
-        <div>
-          <button class="on-btn" onclick="toggleDevice('door', true)">On</button>
-          <button class="off-btn" onclick="toggleDevice('door', false)">Off</button>
-        </div>
-        <p>Door</p>
-      </div>
-
-      <div class="control-box">
-        <img id="imgMusic" src="nhac.png" class="icon">
-        <div>
-          <button class="on-btn" onclick="toggleDevice('music', true)">On</button>
-          <button class="off-btn" onclick="toggleDevice('music', false)">Off</button>
-        </div>
-        <p>Music</p>
-      </div>
+    
+<!-- Điều khiển thiết bị cho chuồng cừu -->
+<div id="cuuControls" class="control-section">
+  <div class="control-box">
+    <img id="imgLightCuu" src="den.png" class="icon">
+    <div>
+      <button class="on-btn" onclick="toggleDevice('light', true)">On</button>
+      <button class="off-btn" onclick="toggleDevice('light', false)">Off</button>
     </div>
+    <p>Light</p>
   </div>
 
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/8.2.10/firebase-app.js"></script>
+  <div class="control-box">
+    <img id="imgDoorCuu" src="door.png" class="icon">
+    <div>
+      <button class="on-btn" onclick="toggleDevice('door', true)">On</button>
+      <button class="off-btn" onclick="toggleDevice('door', false)">Off</button>
+    </div>
+    <p>Door</p>
+  </div>
+
+  <div class="control-box">
+    <img id="imgMusicCuu" src="nhac.png" class="icon">
+    <div>
+      <button class="on-btn" onclick="toggleDevice('music', true)">On</button>
+      <button class="off-btn" onclick="toggleDevice('music', false)">Off</button>
+    </div>
+    <p>Music</p>
+  </div>
+</div>
+
+<!-- Điều khiển thiết bị cho chuồng gà -->
+<div id="gaControls" class="control-section" style="display: none;">
+  <div class="control-box">
+    <img id="imgLightGa" src="den.png" class="icon">
+    <div>
+      <button class="on-btn" onclick="toggleDevice('light', true)">On</button>
+      <button class="off-btn" onclick="toggleDevice('light', false)">Off</button>
+    </div>
+    <p>Light</p>
+  </div>
+
+  <div class="control-box">
+    <img id="imgDoorGa" src="door.png" class="icon">
+    <div>
+      <button class="on-btn" onclick="toggleDevice('door', true)">On</button>
+      <button class="off-btn" onclick="toggleDevice('door', false)">Off</button>
+    </div>
+    <p>Door</p>
+  </div>
+
+  <div class="control-box">
+    <img id="imgMusicGa" src="nhac.png" class="icon">
+    <div>
+      <button class="on-btn" onclick="toggleDevice('music', true)">On</button>
+      <button class="off-btn" onclick="toggleDevice('music', false)">Off</button>
+    </div>
+    <p>Music</p>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/8.2.10/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.2.10/firebase-database.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.2.10/firebase-analytics.js"></script>
   <script src="script.js"></script>
